@@ -10,7 +10,6 @@ def main():
 
     problem1: Problem = Problem()
     problem2: Problem = Problem()
-
     individual1: Individual = Individual(problem1)
     individual2: Individual = Individual(problem2)
 
