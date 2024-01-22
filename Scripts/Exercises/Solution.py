@@ -1,4 +1,5 @@
-from copy import deepcopy, copy
+from copy import deepcopy
+from typing import List
 
 import numpy as np
 
@@ -8,33 +9,54 @@ from Problem import Problem
 
 
 def main():
-    rate_of_gene_mutation: float = 0.25
-    range_of_gene_mutation: float = 2
+    # problem_for_exercise = Problem()
+    # problem_for_exercise.number_of_genes = 5
+    # problem_for_exercise.cost = cost_function_for_exercise
+    # parameters = Parameters()
+    #
+    # print(cost_function_for_exercise([1, 2, 3, 4, 5]))
+    # best_solution = run_genetic(problem_for_exercise, parameters)
+    #
+    # prob_lp = Problem
+    # prob_lp.number_of_genes = 5
+    # prob_lp.cost = cost_lp
+    # prob_lp.min_val = 0
+    # prob_lp.max_val = 10
 
-    problem1: Problem = Problem()
-    problem2: Problem = Problem()
-    individual1: Individual = Individual(problem1)
-    individual2: Individual = Individual(problem2)
+    # to complete
 
-    individual1_initial_chromosome = copy(individual1.chromosome)
-    individual1.mutate(rate_of_gene_mutation, range_of_gene_mutation)
-    print(f'Individual 1: \nChromosome: {individual1_initial_chromosome} \nCost: {individual1.cost} \n'
-          f'Mutated Chromosome: {individual1.chromosome}')
+    problem = Problem()
+    problem.number_of_genes = 10
+    problem.min_val = 1
+    problem.max_val = 10
+    problem.cost = cost_for_individual
 
-    individual2_initial_chromosome = copy(individual2.chromosome)
-    individual2.mutate(rate_of_gene_mutation, range_of_gene_mutation)
-    print(f'Individual 2: \nChromosome: {individual2_initial_chromosome} \nCost: {individual2.cost} \n'
-          f'Mutated Chromosome: {individual2.chromosome}')
+    weights = np.random.uniform(1, 10, 1000)
+    print(weights)
 
-    child1, child2 = individual1.crossover(individual2, .5)
-    print(child1.chromosome)
-    print(child2.chromosome)
+    individual = Individual(problem)
+    individual.chromosome = np.random.choice(weights, problem.number_of_genes)
+    print(individual.chromosome)
+    print(individual.cost)
 
-    parameter1 = Parameters()
+    # https://colab.research.google.com/drive/1TJTnsK1GNkdkB-TDtovrT0FzOPaKV8iZ?usp=sharing#scrollTo=iJt94QdfKwXJ
 
-    best_individual = run_genetic(problem1, parameter1)
-    print(f'Best Solution: \nCost: {best_individual.cost} \nChromosome: {best_individual.chromosome}')
-    print(best_individual.chromosome)
+    values = np.random.randint(0, 50, 1000)
+    print(values)
+
+
+def cost_for_individual(x):
+
+    return sum(x)
+
+
+def cost_lp(v):
+    if v[1] + v[2] + v[3] < 10:
+        return 1000000000
+
+
+def cost_function_for_exercise(x):
+    return (x[0] - 1) ** 2 + (x[1] - 2) ** 2 + (x[2] - 3) ** 2 + (x[3] - 4) ** 2 + (x[4] - 5) ** 2
 
 
 def choose_indices_from(number_in_list: int):
@@ -99,6 +121,30 @@ def run_genetic(problem: Problem, parameters: Parameters):
                 f'{best_solution.chromosome}')
 
     return best_solution
+
+class SelectionIndividual:
+    chromosome: List[float]
+    cost: int
+
+    def __init__(self, problem: Problem):
+        self.chromosome = np.random.uniform(problem.min_val, problem.max_val, problem.number_of_genes)
+        self.cost = problem.cost(self.chromosome)
+
+    def mutate(self, rate_of_gene_mutation: float, range_of_gene_mutation: float):
+        for index in range(len(self.chromosome)):
+            if np.random.uniform() < rate_of_gene_mutation:
+                self.chromosome[index] += np.random.randn() * range_of_gene_mutation
+
+    def crossover(self, other_individual, explore_crossover: int):
+        alpha = np.random.uniform(-explore_crossover, 1 + explore_crossover)
+
+        child1 = deepcopy(self)
+        child2 = deepcopy(other_individual)
+
+        child1.chromosome = alpha * self.chromosome + (1 - alpha) * other_individual.chromosome
+        child2.chromosome = alpha * other_individual.chromosome + (1 - alpha) * self.chromosome
+
+        return child1, child2
 
 
 if __name__ == "__main__":
