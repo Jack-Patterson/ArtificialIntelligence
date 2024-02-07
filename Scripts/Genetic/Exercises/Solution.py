@@ -1,11 +1,10 @@
 from copy import deepcopy
-from typing import List
 
 import numpy as np
 
-from Individual import Individual
-from Parameters import Parameters
-from Problem import Problem
+from Genetic.Individual import Individual
+from Genetic.Parameters import Parameters
+from Genetic.Problem import Problem
 
 
 def main():
@@ -31,18 +30,24 @@ def main():
     problem.max_val = 10
     problem.cost = cost_for_individual
 
+#cost = if weight > total weight return infinity else weight
+
     weights = np.random.uniform(1, 10, 1000)
     print(weights)
 
     individual = Individual(problem)
-    individual.chromosome = np.random.choice(weights, problem.number_of_genes)
-    print(individual.chromosome)
+    individual.chromosome_weight = np.random.choice(weights, problem.number_of_genes)
+    individual.cost = problem.cost(individual.chromosome_weight)
+    print(individual.chromosome_weight)
     print(individual.cost)
 
     # https://colab.research.google.com/drive/1TJTnsK1GNkdkB-TDtovrT0FzOPaKV8iZ?usp=sharing#scrollTo=iJt94QdfKwXJ
 
     values = np.random.randint(0, 50, 1000)
-    print(values)
+    individual.chromosome_value = np.random.choice(values, problem.number_of_genes)
+    individual.cost = problem.cost(individual.chromosome_weight)
+    print(individual.chromosome_value)
+    print(individual.cost)
 
 
 def cost_for_individual(x):
@@ -121,30 +126,6 @@ def run_genetic(problem: Problem, parameters: Parameters):
                 f'{best_solution.chromosome}')
 
     return best_solution
-
-class SelectionIndividual:
-    chromosome: List[float]
-    cost: int
-
-    def __init__(self, problem: Problem):
-        self.chromosome = np.random.uniform(problem.min_val, problem.max_val, problem.number_of_genes)
-        self.cost = problem.cost(self.chromosome)
-
-    def mutate(self, rate_of_gene_mutation: float, range_of_gene_mutation: float):
-        for index in range(len(self.chromosome)):
-            if np.random.uniform() < rate_of_gene_mutation:
-                self.chromosome[index] += np.random.randn() * range_of_gene_mutation
-
-    def crossover(self, other_individual, explore_crossover: int):
-        alpha = np.random.uniform(-explore_crossover, 1 + explore_crossover)
-
-        child1 = deepcopy(self)
-        child2 = deepcopy(other_individual)
-
-        child1.chromosome = alpha * self.chromosome + (1 - alpha) * other_individual.chromosome
-        child2.chromosome = alpha * other_individual.chromosome + (1 - alpha) * self.chromosome
-
-        return child1, child2
 
 
 if __name__ == "__main__":
