@@ -2,9 +2,9 @@ from copy import deepcopy
 
 import numpy as np
 
-from GeneticCA.Individual import Individual
-from GeneticCA.Parameters import Parameters
-from GeneticCA.Problem import Problem
+from Genetic.GeneticCA.Individual import Individual
+from Genetic.GeneticCA.Parameters import Parameters
+from Genetic.GeneticCA.Problem import Problem
 
 
 def main():
@@ -14,10 +14,7 @@ def main():
     best_individual: Individual = run_genetic(problem, parameters)
     # individual1 = Individual(problem)
     # individual2 = Individual(problem)
-    # print(individual1.chromosome)
-    # individual1.mutate(parameters.rate_of_gene_mutation, parameters.range_of_gene_mutation)
-    # print(individual1.chromosome)
-
+    #
     # individual1.chromosome = [5, 6, 8, 2, 3, 9, 4, 1, 7]
     # individual2.chromosome = [1, 7, 2, 6, 3, 9, 8, 4, 5]
     #

@@ -1,4 +1,4 @@
-from GeneticCA.Utils import cost
+from Genetic.GeneticCA.Utils import cost
 
 
 class Problem:

@@ -25,20 +25,18 @@ class Individual:
 
         index1, index2 = 0, 0
         while index1 == index2:
-            index1, index2 = np.random.choice(len(self.chromosome), size=2)
-        if index1 > index2:
-            (index1, index2) = (index2, index1)
-        child1.chromosome = self.chromosome[index1:index2]
-        child1.chromosome.extend([x for x in other_individual.chromosome if x not in child1.chromosome])
-        # print(index1, index2)
+            index1, index2 = sorted(np.random.choice(len(self.chromosome), size=2))
+
+        child1_chromosome = self.chromosome[index1:index2]
+        child1.chromosome = [x for x in other_individual.chromosome if x not in child1_chromosome]
+        child1.chromosome = child1.chromosome[:index1] + child1_chromosome + child1.chromosome[index1:]
 
         index1, index2 = 0, 0
         while index1 == index2:
-            index1, index2 = np.random.choice(len(self.chromosome), size=2)
-        if index1 > index2:
-            (index1, index2) = (index2, index1)
-        child2.chromosome = other_individual.chromosome[index1:index2]
-        child2.chromosome.extend([x for x in self.chromosome if x not in child2.chromosome])
-        # print(index1, index2)
+            index1, index2 = sorted(np.random.choice(len(other_individual.chromosome), size=2))
+
+        child2_chromosome = other_individual.chromosome[index1:index2]
+        child2.chromosome = [x for x in self.chromosome if x not in child2_chromosome]
+        child2.chromosome = child2.chromosome[:index1] + child2_chromosome + child2.chromosome[index1:]
 
         return child1, child2

@@ -7,9 +7,9 @@ class Parameters:
     range_of_gene_mutation: float
 
     def __init__(self):
-        self.population = 2000
+        self.population = 3000
         self.max_number_of_generations = 100
         self.child_rate_per_generation = 1
         self.crossover_explore_rate = 0.2
-        self.rate_of_gene_mutation = 0.4
+        self.rate_of_gene_mutation = 0.5
         self.range_of_gene_mutation = 0.5

@@ -2,9 +2,9 @@ from copy import deepcopy
 
 import numpy as np
 
-from Genetic.Individual import Individual
-from Genetic.Parameters import Parameters
-from Genetic.Problem import Problem
+from Genetic.InClass.Individual import Individual
+from Genetic.InClass.Parameters import Parameters
+from Genetic.InClass.Problem import Problem
 
 
 def main():
