@@ -16,7 +16,7 @@ def play():
     # cb.switch_positions(initial_position, move_position)
     # cb.display()
 
-    cb.switch_positions('B6', 'B4')
+    cb.switch_positions('C3', 'C5')
 
     print(len(cb.all_possible_moves(player_is_playing)))
 
