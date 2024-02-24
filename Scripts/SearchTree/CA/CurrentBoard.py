@@ -1,4 +1,7 @@
-class CurrentBoard:
+from copy import deepcopy
+
+
+class Board:
     board = ""
     default_board = [
         ['.', 'b', '.', 'b', '.', 'b', '.', 'b'],
@@ -39,7 +42,7 @@ class CurrentBoard:
             row_number -= 1
 
     def other(self, piece):
-        return 'B' if piece == 'W' else 'W'
+        return 'B' if piece.upper() == 'W' else 'W'
 
     def Eq3(self, i1, i2, i3):
         if self.board[i1] == " ":
@@ -71,31 +74,96 @@ class CurrentBoard:
                     if piece_at_position == 'w':
                         if index != 0:
                             if index2 == 0:
-                                if self.board[index - 1][index2 + 1] == no_piece_in_position:
-                                    print(self.indices_to_board_position(index - 1, index2 + 1))
+                                character_at_index: str = self.board[index - 1][index2 + 1]
+
+                                if character_at_index == no_piece_in_position:
+                                    new_board = self.get_new_board(index, index2, index - 1, index2 + 1)
+                                    new_board.display()
+                                    print("\n")
+                                    possible_moves.append(new_board)
+                                elif character_at_index.upper() == self.other(player_piece):
+                                    character_at_index = self.board[index - 2][index2 + 2]
+                                    if character_at_index == no_piece_in_position:
+                                        new_board = self.get_new_board(index, index2, index - 2, index2 + 2)
+                                        new_board.remove_at_board_position(index - 1, index2 + 1)
+                                        new_board.display()
+                                        print("\n")
+                                        possible_moves.append(new_board)
                             elif index2 == 7:
-                                if self.board[index - 1][index2 - 1] == no_piece_in_position:
-                                    print(self.indices_to_board_position(index - 1, index2 - 1))
+                                character_at_index: str = self.board[index - 1][index2 - 1]
+
+                                if character_at_index == no_piece_in_position:
+                                    new_board = self.get_new_board(index, index2, index - 1, index2 - 1)
+                                    new_board.display()
+                                    print("\n")
+                                    possible_moves.append(new_board)
+                                elif character_at_index.upper() == self.other(player_piece):
+                                    character_at_index = self.board[index - 2][index2 - 2]
+                                    if character_at_index == no_piece_in_position:
+                                        new_board = self.get_new_board(index, index2, index - 2, index2 - 2)
+                                        new_board.remove_at_board_position(index - 1, index2 - 1)
+                                        new_board.display()
+                                        print("\n")
+                                        possible_moves.append(new_board)
                             else:
-                                if self.board[index - 1][index2 + 1] == no_piece_in_position:
-                                    print(self.indices_to_board_position(index - 1, index2 + 1))
-                                if self.board[index - 1][index2 - 1] == no_piece_in_position:
-                                    print(self.indices_to_board_position(index - 1, index2 - 1))
+                                character_at_index: str = self.board[index - 1][index2 + 1]
+
+                                if character_at_index == no_piece_in_position:
+                                    new_board = self.get_new_board(index, index2, index - 1, index2 + 1)
+                                    new_board.display()
+                                    print("\n")
+                                    possible_moves.append(new_board)
+                                elif 2 <= index2 <= 5 and character_at_index.upper() == self.other(player_piece):
+                                    character_at_index = self.board[index - 2][index2 + 2]
+                                    if character_at_index == no_piece_in_position:
+                                        new_board = self.get_new_board(index, index2, index - 2, index2 + 2)
+                                        new_board.remove_at_board_position(index - 1, index2 + 1)
+                                        new_board.display()
+                                        print("\n")
+                                        possible_moves.append(new_board)
+
+                                character_at_index: str = self.board[index - 1][index2 - 1]
+
+                                if character_at_index == no_piece_in_position:
+                                    new_board = self.get_new_board(index, index2, index - 1, index2 - 1)
+                                    new_board.display()
+                                    print("\n")
+                                    possible_moves.append(new_board)
+                                elif 2 <= index2 <= 5 and character_at_index.upper() == self.other(player_piece):
+                                    character_at_index = self.board[index - 2][index2 - 2]
+                                    if character_at_index == no_piece_in_position:
+                                        new_board = self.get_new_board(index, index2, index - 2, index2 - 2)
+                                        new_board.remove_at_board_position(index - 1, index2 - 1)
+                                        new_board.display()
+                                        print("\n")
+                                        possible_moves.append(new_board)
 
                 else:
                     if piece_at_position == 'b':
-                        if index != 8:
+                        if index != 7:
                             if index2 == 0:
                                 if self.board[index + 1][index2 + 1] == no_piece_in_position:
-                                    print(self.indices_to_board_position(index + 1, index2 + 1))
+                                    new_board = self.get_new_board(index, index2, index + 1, index2 + 1)
+                                    new_board.display()
+                                    print("\n")
+                                    possible_moves.append(new_board)
                             elif index2 == 7:
                                 if self.board[index + 1][index2 - 1] == no_piece_in_position:
-                                    print(self.indices_to_board_position(index + 1, index2 - 1))
+                                    new_board = self.get_new_board(index, index2, index + 1, index2 - 1)
+                                    new_board.display()
+                                    print("\n")
+                                    possible_moves.append(new_board)
                             else:
                                 if self.board[index + 1][index2 + 1] == no_piece_in_position:
-                                    print(self.indices_to_board_position(index + 1, index2 + 1))
+                                    new_board = self.get_new_board(index, index2, index + 1, index2 + 1)
+                                    new_board.display()
+                                    print("\n")
+                                    possible_moves.append(new_board)
                                 if self.board[index + 1][index2 - 1] == no_piece_in_position:
-                                    print(self.indices_to_board_position(index + 1, index2 - 1))
+                                    new_board = self.get_new_board(index, index2, index + 1, index2 - 1)
+                                    new_board.display()
+                                    print("\n")
+                                    possible_moves.append(new_board)
 
         return possible_moves
 
@@ -120,3 +188,15 @@ class CurrentBoard:
 
         (self.board[initial_row_index][initial_column_index], self.board[move_row_index][move_column_index]) = (
             self.board[move_row_index][move_column_index], self.board[initial_row_index][initial_column_index])
+
+    def remove_at_board_position(self, row_index, column_index, remove_character='.'):
+        self.board[row_index][column_index] = remove_character
+
+    def get_new_board(self, initial_pos_row, initial_pos_column, new_pos_row, new_pos_column):
+        current_position = self.indices_to_board_position(initial_pos_row, initial_pos_column)
+        potential_move_position = self.indices_to_board_position(new_pos_row, new_pos_column)
+
+        new_board = Board(deepcopy(self.board))
+        new_board.switch_positions(current_position, potential_move_position)
+
+        return new_board
