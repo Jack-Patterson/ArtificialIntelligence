@@ -1,4 +1,5 @@
 from copy import deepcopy
+from typing import Tuple
 
 
 class Board:
@@ -51,10 +52,10 @@ class Board:
             row_number -= 1
         print("\n")
 
-    def other(self, piece):
+    def other(self, piece: str) -> str:
         return 'B' if piece.upper() == 'W' else 'W'
 
-    def all_possible_moves(self, player_piece: str):
+    def all_possible_moves(self, player_piece: str) -> list:
         possible_moves = []
         no_piece_in_position = '.'
         direction = -1 if player_piece.upper() == 'W' else 1
@@ -160,7 +161,12 @@ class Board:
 
         return new_board
 
-    def count_pieces(self):
+    def count_pieces(self) -> Tuple[int, int]:
+        """
+
+        Returns: Tuple containing the counts of black and white pieces on the board.
+
+        """
         black_pieces = 0
         white_pieces = 0
 

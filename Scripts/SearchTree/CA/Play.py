@@ -10,11 +10,6 @@ def play():
 
     cb = Board()
 
-    # initial_position = input("Enter the initial position (e.g., C8): ")
-    # move_position = input("Enter the move position (e.g., D7): ")
-    # cb.switch_positions(initial_position, move_position)
-    # cb.display()
-
     while game_is_finished is False:
         player_is_playing = 'W' if players_turn is True else 'B'
 

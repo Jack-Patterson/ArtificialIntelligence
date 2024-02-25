@@ -25,7 +25,6 @@ class SearchTreeNode:
         self.children = sorted(self.children, key=lambda x: x.min_max_value())
 
         if (self.ply_depth % 2) == 0:
-            # computers move
             self.value = self.children[-1].value
         else:
             self.value = self.children[0].value
