@@ -1,16 +1,19 @@
 class SearchTreeNode:
 
-    def __init__(self, board_instance, playing_as, ply=0):
+    def __init__(self, board_instance, playing_as, ply_depth=0, max_ply_depth=5):
         self.children = []
         self.value_is_assigned = False
-        self.ply_depth = ply
+        self.ply_depth = ply_depth
+        self.max_ply_depth = max_ply_depth
         self.current_board = board_instance
         self.move_for = playing_as
-        if self.current_board.state == "U":
+        if self.current_board.state == "U" and ply_depth != max_ply_depth:
             self.generate_children()
         else:
             if self.current_board.state == "D":
                 self.value = 0
+            elif self.current_board.state == "U":
+                self.value = self.evaluate_board()
             else:
                 if (self.ply_depth % 2) == 0:
                     self.value = -1
@@ -37,3 +40,13 @@ class SearchTreeNode:
             self.children.append(
                 SearchTreeNode(board_for_next_move, self.current_board.get_other_piece_colour(self.move_for),
                                self.ply_depth + 1))
+
+    def evaluate_board(self):
+        total_pieces = 24
+        modifier = -1 if self.ply_depth % 2 == 0 else 1
+
+        white_pieces, black_pieces = self.current_board.count_pieces()
+        piece_difference = white_pieces - black_pieces
+        score = (piece_difference / total_pieces) * modifier
+
+        return score

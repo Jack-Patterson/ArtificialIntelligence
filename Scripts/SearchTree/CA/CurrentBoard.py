@@ -95,6 +95,18 @@ class Board:
                 if self.board[new_row][new_col] == no_piece_in_position:
                     possible_moves.add((new_row, new_col))
 
+        jump_positions = [(piece_row_index + 2 * direction, piece_column_index - 2),
+                          (piece_row_index + 2 * direction, piece_column_index + 2)]
+
+        for jump_row, jump_col in jump_positions:
+            mid_row = (piece_row_index + jump_row) // 2
+            mid_col = (piece_column_index + jump_col) // 2
+
+            if 0 <= jump_row < len(self.board) and 0 <= jump_col < len(self.board[0]):
+                if (self.board[jump_row][jump_col] == no_piece_in_position and
+                        self.board[mid_row][mid_col].upper() == self.get_other_piece_colour(player_piece).upper()):
+                    possible_moves.add((jump_row, jump_col))
+
         return possible_moves
 
     def is_player_piece_at_position(self, player_piece: str, piece_row_index: int, piece_column_index: int) -> bool:
@@ -145,6 +157,21 @@ class Board:
                          move_column_index: int) -> None:
         (self.board[initial_row][piece_column_index], self.board[move_row_index][move_column_index]) = (
             self.board[move_row_index][move_column_index], self.board[initial_row][piece_column_index])
+
+    def remove_at_board_position_if_jump(self, player_piece: str, initial_piece_row_index: int,
+                                         initial_piece_column_index: int, new_piece_row_index: int,
+                                         new_piece_column_index: int, remove_character: chr = '.') -> None:
+        direction = -1 if player_piece == 'W' else 1
+
+        if (new_piece_row_index - initial_piece_row_index == 2 * direction and abs(
+                new_piece_column_index - initial_piece_column_index) == 2) or (
+                initial_piece_row_index - new_piece_row_index == 2 * direction and abs(
+                initial_piece_column_index - new_piece_column_index) == 2):
+            jumped_row_index = initial_piece_row_index + direction
+            jumped_column_index = initial_piece_column_index + (
+                        new_piece_column_index - initial_piece_column_index) // 2
+
+            self.remove_at_board_position(jumped_row_index, jumped_column_index)
 
     def remove_at_board_position(self, piece_row_index: int, piece_column_index: int,
                                  remove_character: chr = '.') -> None:

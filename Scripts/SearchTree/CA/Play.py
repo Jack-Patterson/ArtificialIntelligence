@@ -7,12 +7,11 @@ def play():
 
     response = input("Do you wish to play first? White will go first. (y/n) ")
     players_turn = (response.lower() == "y")
+    player_is_playing = 'W' if players_turn is True else 'B'
 
     cb = Board()
 
     while game_is_finished is False:
-        player_is_playing = 'W' if players_turn is True else 'B'
-
         if players_turn:
             initial_row, initial_column = 0, 0
             move_row, move_column = 0, 0
@@ -32,11 +31,14 @@ def play():
                 move_row, move_column = cb.get_value_position_at_index(move_position)
 
             cb.switch_positions(initial_row, initial_column, move_row, move_column)
+            cb.remove_at_board_position_if_jump(player_is_playing, initial_row, initial_column, move_row, move_column)
+
+            cb.display()
         else:
-            # search_tree = SearchTreeNode(cb, cb.other(player_is_playing))
-            # search_tree.min_max_value()
-            # cb = search_tree.children[-1].current_board
-            pass
+            search_tree = SearchTreeNode(cb, cb.get_other_piece_colour(player_is_playing))
+            search_tree.min_max_value()
+            cb = search_tree.children[-1].current_board
+            # pass
 
         if cb.state != 'U':
             if cb.state == "D":
