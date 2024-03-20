@@ -25,12 +25,13 @@ class SearchTreeNode:
         if self.value_is_assigned:
             return self.value
 
-        self.children = sorted(self.children, key=lambda x: x.min_max_value())
+        if len(self.children) == 0:
+            return self.evaluate_board()
 
         if (self.ply_depth % 2) == 0:
-            self.value = self.children[-1].value
+            self.value = max(child.min_max_value() for child in self.children)
         else:
-            self.value = self.children[0].value
+            self.value = min(child.min_max_value() for child in self.children)
         self.value_is_assigned = True
 
         return self.value
