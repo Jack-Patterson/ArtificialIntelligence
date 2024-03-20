@@ -1,4 +1,4 @@
-from SearchTree.CA.CurrentBoard import Board
+from SearchTree.CA.Board import Board
 from SearchTree.CA.SearchTreeNode import SearchTreeNode
 
 
@@ -9,7 +9,18 @@ def play():
     players_turn = (response.lower() == "y")
     player_is_playing = 'W' if players_turn is True else 'B'
 
-    cb = Board()
+    new_board = [
+        ['.', 'b', '.', 'b', '.', '.', '.', '.'],
+        ['b', '.', 'b', '.', 'b', '.', 'w', '.'],
+        ['.', 'b', '.', 'b', '.', '.', '.', '.'],
+        ['.', '.', '.', '.', '.', '.', '.', '.'],
+        ['.', '.', '.', '.', '.', 'b', '.', '.'],
+        ['w', '.', 'w', '.', 'w', '.', 'w', '.'],
+        ['.', 'w', '.', 'w', '.', 'b', '.', 'w'],
+        ['w', '.', 'w', '.', 'w', '.', '.', '.']
+    ]
+
+    cb = Board(new_board)
 
     while game_is_finished is False:
         if players_turn:
@@ -17,7 +28,9 @@ def play():
             move_row, move_column = 0, 0
 
             possible_moves = cb.get_positions_of_all_possible_moves(player_is_playing)
+            white_pieces, black_pieces = cb.count_pieces()
             print("Current Board State: \nAll possible places to move are signified by an 'o'.")
+            print(f"White Pieces on the board: {white_pieces}, Black Pieces on the board: {black_pieces}")
             cb.display(possible_moves)
             while cb.board[initial_row][initial_column].upper() != player_is_playing.upper():
                 initial_position = input("Enter the initial position (e.g., C8): ")
@@ -25,6 +38,7 @@ def play():
 
             possible_moves = cb.get_positions_of_all_possible_moves(player_is_playing, initial_row, initial_column)
             print("All potential moves for the selected piece: \nAll possible places to move are signified by an 'o'.")
+            print(f"White Pieces on the board: {white_pieces}, Black Pieces on the board: {black_pieces}")
             cb.display(possible_moves)
             while (move_row, move_column) not in possible_moves:
                 move_position = input("Enter the move position (e.g., D7): ")
