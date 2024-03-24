@@ -20,7 +20,7 @@ class Board:
             self.board = self.default_board
         else:
             self.board = string_def
-        self.state = self.state_of_board()
+        self.state = self.state_of_board
 
     def state_of_board(self):
         white_pieces, black_pieces = self.count_pieces()
@@ -55,18 +55,21 @@ class Board:
         return 'B' if piece.upper() == 'W' else 'W'
 
     def get_all_possible_moves(self, player_piece: str) -> list:
-        possible_moves = []
+        possible_regular_moves = []
+        possible_jump_moves = []
         direction = -1 if player_piece.upper() == 'W' else 1
 
         for row in range(len(self.board)):
             for col in range(len(self.board[row])):
                 if self.is_player_piece_at_position(player_piece, row, col):
-                    self.find_moves_for_piece(player_piece, row, col, direction, possible_moves)
+                    self.find_moves_for_piece(player_piece, row, col, direction, possible_regular_moves,
+                                              possible_jump_moves)
 
-        return possible_moves
+        return possible_jump_moves if len(possible_jump_moves) > 0 else possible_regular_moves
 
     def find_moves_for_piece(self, player_piece: str, piece_row_index: int, piece_column_index: int,
-                             jump_direction: int, possible_moves, empty_position_character: chr = '.'):
+                             jump_direction: int, possible_regular_moves, possible_jump_moves,
+                             empty_position_character: chr = '.'):
         opponent_piece = self.get_other_piece_colour(player_piece)
         move_positions = [(piece_row_index + jump_direction, piece_column_index - 1),
                           (piece_row_index + jump_direction, piece_column_index + 1)]
@@ -79,7 +82,7 @@ class Board:
         for new_row, new_col in move_positions:
             if 0 <= new_row <= 7 and 0 <= new_col <= 7:
                 if self.board[new_row][new_col] == empty_position_character:
-                    self.add_regular_move(piece_row_index, piece_column_index, new_row, new_col, possible_moves)
+                    self.add_regular_move(piece_row_index, piece_column_index, new_row, new_col, possible_regular_moves)
                 elif self.board[new_row][new_col].upper() == opponent_piece:
                     direction_row = new_row - piece_row_index
                     direction_col = 1 if new_col > piece_column_index else -1
@@ -89,7 +92,7 @@ class Board:
                     if 0 <= potential_jump_row < len(self.board) and 0 <= potential_jump_col < len(self.board[0]) and \
                             self.board[potential_jump_row][potential_jump_col] == empty_position_character:
                         self.add_jump_move(piece_row_index, piece_column_index, new_row, new_col, potential_jump_row,
-                                           potential_jump_col, possible_moves)
+                                           potential_jump_col, possible_jump_moves)
 
     def is_player_piece_at_position(self, player_piece: str, piece_row_index: int, piece_column_index: int) -> bool:
         return self.board[piece_row_index][piece_column_index].upper() == player_piece.upper()
@@ -106,10 +109,9 @@ class Board:
 
     def find_moves_for_king_piece(self, row, col, possible_moves):
         moves = []
-        directions = [(1, 1), (1, -1), (-1, 1), (-1, -1)]  # Diagonal directions
+        directions = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
         for d_row, d_col in directions:
             next_row, next_col = row + d_row, col + d_col
-            # Check if the next position is within the board and empty
             if 0 <= next_row < len(self.board) and 0 <= next_col < len(self.board[0]) and self.board[next_row][
                 next_col] == '.':
                 moves.append((next_row, next_col))
@@ -118,55 +120,26 @@ class Board:
     def get_positions_of_all_possible_moves(self, player_piece, piece_row_index=None, piece_column_index=None) \
             -> Set[Tuple[int, int]]:
         if type(piece_row_index) is int and type(piece_column_index) is int:
-            possible_moves = self.get_positions_of_all_possible_moves_for_piece(player_piece, piece_row_index,
-                                                                                piece_column_index)
+            possible_regular_moves, possible_jumps_moves = self.get_positions_of_all_possible_moves_for_piece(player_piece,
+                                                                                                piece_row_index,
+                                                                                                piece_column_index)
         else:
-            possible_moves = set()
+            possible_regular_moves = set()
+            possible_jumps_moves = set()
             for row in range(len(self.board)):
                 for column in range(len(self.board[row])):
                     if self.is_player_piece_at_position(player_piece, row, column):
-                        piece_moves = self.get_positions_of_all_possible_moves_for_piece(player_piece, row, column)
-                        possible_moves.update(piece_moves)
+                        piece_moves, piece_jumps = self.get_positions_of_all_possible_moves_for_piece(player_piece, row,
+                                                                                                      column)
+                        possible_regular_moves.update(piece_moves)
+                        possible_jumps_moves.update(piece_jumps)
 
-        return possible_moves
+        return possible_jumps_moves if possible_jumps_moves else possible_regular_moves
 
     def get_positions_of_all_possible_moves_for_piece(self, player_piece: str, piece_row_index: int,
                                                       piece_column_index: int) -> Set[Tuple[int, int]]:
-        # possible_moves = set()
-        # no_piece_in_position = '.'
-        # direction = -1 if player_piece.upper() == 'W' else 1
-        #
-        # self.display()
-        #
-        # move_positions = [(piece_row_index + direction, piece_column_index - 1),
-        #                   (piece_row_index + direction, piece_column_index + 1)]
-        # if self.board[piece_row_index][piece_column_index].isupper():
-        #     move_positions.extend([(piece_row_index - direction, piece_column_index - 1),
-        #                            (piece_row_index - direction, piece_column_index + 1)])
-        #
-        # for new_row, new_col in move_positions:
-        #     if 0 <= new_row < len(self.board) and 0 <= new_col < len(self.board[0]):
-        #         if self.board[new_row][new_col] == no_piece_in_position:
-        #             possible_moves.add((new_row, new_col))
-        #
-        # jump_positions = [(piece_row_index + 2 * direction, piece_column_index - 2),
-        #                   (piece_row_index + 2 * direction, piece_column_index + 2)]
-        # if self.board[piece_row_index][piece_column_index].isupper():
-        #     jump_positions += [(piece_row_index - 2 * direction, piece_column_index - 2),
-        #                        (piece_row_index - 2 * direction, piece_column_index + 2)]
-        #
-        # for jump_row, jump_col in jump_positions:
-        #     mid_row = (piece_row_index + jump_row) // 2
-        #     mid_col = (piece_column_index + jump_col) // 2
-        #
-        #     if 0 <= jump_row < len(self.board) and 0 <= jump_col < len(self.board[0]):
-        #         if (self.board[jump_row][jump_col] == no_piece_in_position and
-        #                 self.board[mid_row][mid_col].upper() == self.get_other_piece_colour(player_piece).upper()):
-        #             possible_moves.add((jump_row, jump_col))
-        #
-        # return possible_moves
-
-        possible_moves = set()
+        possible_regular_moves = set()
+        possible_jumps_moves = set()
         no_piece_in_position = '.'
         direction = -1 if player_piece.upper() == 'W' else 1
 
@@ -175,17 +148,11 @@ class Board:
         jump_positions = [(piece_row_index + 2 * direction, piece_column_index - 2),
                           (piece_row_index + 2 * direction, piece_column_index + 2)]
 
-        # if self.board[piece_row_index][piece_column_index].isupper():  # Check if it's a king
-            # Add all four directions for kings
-            # move_positions.extend([(piece_row_index - direction, piece_column_index - 1),
-            #                        (piece_row_index - direction, piece_column_index + 1)])
-            # jump_positions.extend([(piece_row_index - 2 * direction, piece_column_index - 2),
-            #                        (piece_row_index - 2 * direction, piece_column_index + 2)])
-
-        for new_row, new_col in move_positions:
-            if 0 <= new_row < len(self.board) and 0 <= new_col < len(self.board[0]):
-                if self.board[new_row][new_col] == no_piece_in_position:
-                    possible_moves.add((new_row, new_col))
+        if self.board[piece_row_index][piece_column_index].isupper():
+            move_positions.extend([(piece_row_index - direction, piece_column_index - 1),
+                                   (piece_row_index - direction, piece_column_index + 1)])
+            jump_positions.extend([(piece_row_index - 2 * direction, piece_column_index - 2),
+                                   (piece_row_index - 2 * direction, piece_column_index + 2)])
 
         for jump_row, jump_col in jump_positions:
             mid_row = (piece_row_index + jump_row) // 2
@@ -194,9 +161,15 @@ class Board:
             if 0 <= jump_row < len(self.board) and 0 <= jump_col < len(self.board[0]):
                 if (self.board[jump_row][jump_col] == no_piece_in_position and
                         self.board[mid_row][mid_col].upper() == self.get_other_piece_colour(player_piece).upper()):
-                    possible_moves.add((jump_row, jump_col))
+                    possible_jumps_moves.add((jump_row, jump_col))
 
-        return possible_moves
+        if not possible_jumps_moves:
+            for new_row, new_col in move_positions:
+                if 0 <= new_row < len(self.board) and 0 <= new_col < len(self.board[0]):
+                    if self.board[new_row][new_col] == no_piece_in_position:
+                        possible_regular_moves.add((new_row, new_col))
+
+        return possible_regular_moves, possible_jumps_moves
 
     def get_value_position_at_index(self, position: str) -> Tuple[int, int]:
         column_index = ord(position[0].upper()) - ord('A')
@@ -267,3 +240,19 @@ class Board:
                     black_pieces += 1
 
         return white_pieces, black_pieces
+
+    def count_pawns_and_kings(self):
+        white_pawns, black_pawns, white_kings, black_kings = 0, 0, 0, 0
+
+        for row in self.board:
+            for cell in row:
+                if cell == 'w':
+                    white_pawns += 1
+                elif cell == 'W':
+                    white_kings += 1
+                elif cell == 'b':
+                    black_pawns += 1
+                elif cell == 'B':
+                    black_kings += 1
+
+        return white_pawns, black_pawns, white_kings, black_kings
