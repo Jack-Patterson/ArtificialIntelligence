@@ -120,9 +120,10 @@ class Board:
     def get_positions_of_all_possible_moves(self, player_piece, piece_row_index=None, piece_column_index=None) \
             -> Set[Tuple[int, int]]:
         if type(piece_row_index) is int and type(piece_column_index) is int:
-            possible_regular_moves, possible_jumps_moves = self.get_positions_of_all_possible_moves_for_piece(player_piece,
-                                                                                                piece_row_index,
-                                                                                                piece_column_index)
+            possible_regular_moves, possible_jumps_moves = self.get_positions_of_all_possible_moves_for_piece(
+                player_piece,
+                piece_row_index,
+                piece_column_index)
         else:
             possible_regular_moves = set()
             possible_jumps_moves = set()
@@ -198,16 +199,16 @@ class Board:
                                          initial_piece_column_index: int, new_piece_row_index: int,
                                          new_piece_column_index: int) -> None:
         if self.board[new_piece_row_index][new_piece_column_index].isupper():
-            direction = [-1, 1]
+            directions = [-1, 1]
         else:
-            direction = [-1] if player_piece == 'W' else [1]
+            directions = [-1] if player_piece == 'W' else [1]
 
-        for dir in direction:
-            if (new_piece_row_index - initial_piece_row_index == 2 * dir and abs(
+        for direction in directions:
+            if (new_piece_row_index - initial_piece_row_index == 2 * direction and abs(
                     new_piece_column_index - initial_piece_column_index) == 2) or (
-                    initial_piece_row_index - new_piece_row_index == 2 * dir and abs(
+                    initial_piece_row_index - new_piece_row_index == 2 * direction and abs(
                 initial_piece_column_index - new_piece_column_index) == 2):
-                jumped_row_index = initial_piece_row_index + dir
+                jumped_row_index = initial_piece_row_index + direction
                 jumped_column_index = initial_piece_column_index + (
                         new_piece_column_index - initial_piece_column_index) // 2
 
