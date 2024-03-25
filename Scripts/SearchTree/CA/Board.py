@@ -75,22 +75,22 @@ class Board:
                 piece_row_index,
                 piece_column_index)
         else:
-            possible_regular_moves = set()
-            possible_jumps_moves = set()
+            possible_regular_moves = []
+            possible_jumps_moves = []
             for row in range(len(self.board)):
                 for column in range(len(self.board[row])):
                     if self.is_player_piece_at_position(player_piece, row, column):
                         piece_moves, piece_jumps = self.get_positions_of_all_possible_moves_for_piece(player_piece, row,
                                                                                                       column, as_board)
-                        possible_regular_moves.update(piece_moves)
-                        possible_jumps_moves.update(piece_jumps)
+                        possible_regular_moves.extend(piece_moves)
+                        possible_jumps_moves.extend(piece_jumps)
 
         return possible_jumps_moves if possible_jumps_moves else possible_regular_moves
 
     def get_positions_of_all_possible_moves_for_piece(self, player_piece: str, piece_row_index: int,
                                                       piece_column_index: int, as_board: bool = False):
-        possible_regular_moves = set()
-        possible_jumps_moves = set()
+        possible_regular_moves = []
+        possible_jumps_moves = []
         no_piece_in_position = '.'
         direction = -1 if player_piece.upper() == 'W' else 1
 
@@ -115,9 +115,9 @@ class Board:
                     if as_board:
                         new_board = self.add_jump_move(piece_row_index, piece_column_index, mid_row, mid_col, jump_row,
                                                        jump_col)
-                        possible_jumps_moves.add(new_board)
+                        possible_jumps_moves.append(new_board)
                     else:
-                        possible_jumps_moves.add((jump_row, jump_col))
+                        possible_jumps_moves.append((jump_row, jump_col))
 
         if not possible_jumps_moves:
             for new_row, new_col in move_positions:
@@ -125,9 +125,9 @@ class Board:
                     if self.board[new_row][new_col] == no_piece_in_position:
                         if as_board:
                             new_board = self.add_regular_move(piece_row_index, piece_column_index, new_row, new_col)
-                            possible_jumps_moves.add(new_board)
+                            possible_regular_moves.append(new_board)
                         else:
-                            possible_regular_moves.add((new_row, new_col))
+                            possible_regular_moves.append((new_row, new_col))
 
         return possible_regular_moves, possible_jumps_moves
 
