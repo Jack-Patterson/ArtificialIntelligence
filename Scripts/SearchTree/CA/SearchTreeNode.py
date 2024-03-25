@@ -39,7 +39,7 @@ class SearchTreeNode:
         return self.value
 
     def generate_children(self):
-        for board_for_next_move in self.current_board.get_all_possible_moves(self.move_for):
+        for board_for_next_move in self.current_board.get_positions_of_all_possible_moves(self.move_for, None, None, True):
             self.children.append(
                 SearchTreeNode(board_for_next_move, self.current_board.get_other_piece_colour(self.move_for),
                                self.ply_depth + 1))
