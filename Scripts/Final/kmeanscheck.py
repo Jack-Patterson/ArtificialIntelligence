@@ -78,7 +78,7 @@ from sklearn.cluster import KMeans
 #      [10.488, -66.8792], [21.0245, 105.8412], [-13.2816, -176.1745], [27.1532, -13.2014], [15.3531, 44.2078],
 #      [-15.4134, 28.2771], [-17.8294, 31.0539]])
 
-with open('data/operations_cleaned.csv', mode='r', newline='', encoding='utf-8') as infile:
+with open('Data/DataSets/operations_cleaned.csv', mode='r', newline='', encoding='utf-8') as infile:
     reader = csv.reader(infile)
     header = next(reader)
     rows = [[row[5], row[6]] for row in reader]
@@ -89,7 +89,7 @@ for row in rows:
         if row[0] != 100.65 and float(row[1]) < 80.00:
             bombing_locations.append([float(row[0]), float(row[1])])
 
-with open('data/europenorthafricacitiespop.csv', mode='r', newline='', encoding='utf-8') as infile:
+with open('Data/DataSets/emea_locations.csv', mode='r', newline='', encoding='utf-8') as infile:
     reader = csv.reader(infile)
     header = next(reader)
     rowdata = [row for row in reader]
@@ -107,7 +107,7 @@ for row in rowdata:
         # world_locations.append(row)
         world_locations.append([float(row[5]), float(row[6])])
 #
-# with open('data/europenorthafricacitiespop.csv', mode='w', newline='', encoding='utf-8') as outfile:
+# with open('data/emea_locations.csv', mode='w', newline='', encoding='utf-8') as outfile:
 #     writer = csv.writer(outfile)
 #     writer.writerow(header)
 #     writer.writerows(world_locations)
@@ -177,7 +177,7 @@ for location in unique_significant_centroids:
     folium.Marker([location[0], location[1]]).add_to(map)
 
 print("Saving map")
-map_path = 'Data/map_of_locations_1000_clusters.html'
+map_path = 'Data/Images/map_of_locations_1000_clusters.html'
 map.save(map_path)
 
 print(f"Map has been saved to {map_path}")

@@ -36,7 +36,7 @@ class DataCleaner:
     def remove_if_row_empty(self, row_index):
         self.data = [row for row in self.data if row[row_index] != '']
 
-    def filter_for_locations(self, filter_data, row_index):
+    def filter_for_locations(self, row_index, filter_data):
         self.data = [row for row in self.data if row[row_index] in filter_data]
 
     def remove_all_over_threshold(self, row_index, threshold):

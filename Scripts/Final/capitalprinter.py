@@ -1,6 +1,6 @@
 import csv
 
-with open('data/country-capital-lat-long-population.csv', mode='r', newline='', encoding='utf-8') as infile:
+with open('Data/DataSets/country-capital-lat-long-population.csv', mode='r', newline='', encoding='utf-8') as infile:
     reader = csv.reader(infile)
     header = next(reader)
     rows = [[row[2], row[3]] for row in reader]

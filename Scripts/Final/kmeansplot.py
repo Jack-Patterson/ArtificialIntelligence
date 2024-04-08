@@ -6,7 +6,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
 
-with open('data/operations_cleaned.csv', mode='r', newline='', encoding='utf-8') as infile:
+with open('Data/DataSets/operations_cleaned.csv', mode='r', newline='', encoding='utf-8') as infile:
     reader = csv.reader(infile)
     header = next(reader)
     rows = [[row[5], row[6]] for row in reader]
@@ -17,7 +17,7 @@ for row in rows:
         if row[0] != 100.65 and float(row[1]) < 60.00:
             bombing_locations.append([float(row[0]), float(row[1])])
 
-with open('data/europenorthafricacitiespop.csv', mode='r', newline='', encoding='utf-8') as infile:
+with open('Data/DataSets/emea_locations.csv', mode='r', newline='', encoding='utf-8') as infile:
     reader = csv.reader(infile)
     header = next(reader)
     rowdata = [row for row in reader]

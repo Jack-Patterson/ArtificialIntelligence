@@ -18,7 +18,7 @@ def filter_and_save_csv(input_filename, output_filename, target_value):
 
 
 # Replace 'your_input_file.csv' with the path to your actual input CSV file
-input_csv = 'Data/worldcitiespop.csv'
+input_csv = 'Data/world_locations.csv'
 output_csv = 'Data/new_data.csv'
 filter_value = 'ie'
 
