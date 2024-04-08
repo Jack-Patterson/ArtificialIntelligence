@@ -1,22 +1,68 @@
 import csv
+import os
 
+import folium
+import joblib
 import numpy as np
+from matplotlib import pyplot as plt
+from sklearn.cluster import KMeans
 
 from Final.DataCleaner import DataCleaner
 
+os.environ['LOKY_MAX_CPU_COUNT'] = '4'
+
 
 def main():
-    # Cleaning the original csv files.
+    should_load_kmeans = True
+    clusters_count = 10
+    bombing_dataset_name = 'Data/DataSets/operations_cleaned.csv'
+    world_locations_dataset_name = 'Data/DataSets/emea_locations.csv'
+    kmeans_model_name = f'Data/kmeans_bombing_model_clusters_{clusters_count}.pkl'
+    scatter_diagram_name = f'Data/Images/bombing_scatter_clusters_{clusters_count}.png'
+    map_name = f'Data/Images/map_of_locations_clusters_{clusters_count}.html'
+
+    print('Cleaning original csv files.')
     # clean_bombing_operations()
     # clean_world_locations()
 
-    # Loading the files into memory and filters for relevant rows.
-    _, bombing_locations_full = load_file('Data/DataSets/operations_cleaned.csv')
-    _, world_locations_full = load_file('Data/DataSets/emea_locations.csv')
+    print('Loading the files into memory and filtering for relevant rows.')
+    _, bombing_locations_full = load_file(bombing_dataset_name)
+    _, world_locations_full = load_file(world_locations_dataset_name)
 
     bombing_locations = filter_for_latitude_and_longitude(bombing_locations_full, 4, 5)
     world_locations = filter_for_latitude_and_longitude(world_locations_full, 3, 4)
 
+    print('Beginning KMeans.')
+    bombings_per_centroid_threshold = 10
+
+    if should_load_kmeans:
+        kmeans = joblib.load(kmeans_model_name)
+    else:
+        kmeans = cluster_and_fit_data(world_locations, clusters_count)
+
+    print("Fitting bombing locations to a world location.")
+    nearest_locations_indices = kmeans.predict(bombing_locations)
+
+    print(
+        f'Filtering cluster locations to only include ones that have more bombings than '
+        f'{bombings_per_centroid_threshold}.')
+    significant_centroids = filter_significant_centroids(kmeans, nearest_locations_indices,
+                                                         bombings_per_centroid_threshold)
+
+    if not should_load_kmeans:
+        print(f'Saving KMeans model to {kmeans_model_name}.')
+        save_kmeans_model(kmeans, kmeans_model_name)
+    print('Ending KMeans.')
+
+    print('Beginning display data.')
+    print('Rounding for significant centroids.')
+    unique_significant_centroids = round_significant_centroids(significant_centroids)
+
+    print('Plotting on scatter diagram.')
+    plot_and_save_on_scatter_diagram(unique_significant_centroids, scatter_diagram_name)
+
+    print("Plotting on map.")
+    plot_and_save_on_map(unique_significant_centroids, map_name)
 
 
 def clean_bombing_operations(input_name='Data/DataSets/operations.csv',
@@ -97,6 +143,110 @@ def filter_for_latitude_and_longitude(data, latitude_index, longitude_index):
 
     """
     return np.array([[row[latitude_index], row[longitude_index]] for row in data])
+
+
+def cluster_and_fit_data(data, number_clusters):
+    """
+    Clusters the data and fits the world locations dataset to it.
+    Args:
+        data: World location dataset.
+        number_clusters: Number of clusters.
+
+    Returns: KMeans object.
+
+    """
+    return KMeans(n_clusters=number_clusters, n_init=10).fit(data)
+
+
+def filter_significant_centroids(kmeans, nearest_locations_indices,
+                                 bombings_per_centroid_threshold=10):
+    """
+    Filters the centroids from the kmeans and excludes any that have less bombings fitted to than the threshold.
+    Args:
+        kmeans: KMeans object.
+        nearest_locations_indices: Indices of the nearest locations of the bombings
+        bombings_per_centroid_threshold: Threshold of how many bombings have to have been fit to the centroid to not
+        be excluded.
+
+    Returns: The significant clusters that have the necessary bombings in it.
+
+    """
+
+    bombings_per_centroid = np.bincount(nearest_locations_indices)
+    significant_centroids_indices = np.where(bombings_per_centroid > bombings_per_centroid_threshold)[0]
+    significant_centroids = kmeans.cluster_centers_[significant_centroids_indices]
+
+    return significant_centroids
+
+
+def round_significant_centroids(centroids):
+    """
+    Used for processing on the graphs. Gets only one value for each centroid to avoid duplication for the graphs.
+    Prevents delays on the map. Credit: ChatGPT, I couldn't figure out how to do it the best.
+    Args:
+        centroids: Centroids from KMeans.
+
+    Returns: List of unique centroids.
+
+    """
+    rounded_significant_centroids = np.round(centroids, decimals=5)
+    dtype = np.dtype(','.join(['f8'] * rounded_significant_centroids.shape[1]))
+    _, unique_indices = np.unique(rounded_significant_centroids.view(dtype), return_index=True, axis=0)
+    unique_significant_centroids = centroids[unique_indices]
+
+    return unique_significant_centroids
+
+
+def save_kmeans_model(kmeans, name):
+    """
+    Saves the model to a file.
+    Args:
+        kmeans: KMeans object.
+        name: File path to save location.
+
+    """
+    joblib.dump(kmeans, name)
+
+
+def plot_and_save_on_scatter_diagram(centroids, file_name):
+    """
+    Plots the KMeans data on a scatter diagram.
+    Args:
+        centroids: Data to plot.
+        file_name: File path to save location.
+
+
+    """
+    latitude = centroids[:, 0]
+    longitude = centroids[:, 1]
+
+    plt.scatter(longitude, latitude)
+    plt.xlabel('Longitude')
+    plt.ylabel('Latitude')
+    plt.title('Geographical Scatter Plot')
+
+    print(f"Saving diagram to {file_name}")
+    plt.savefig(file_name)
+    plt.close()
+
+
+def plot_and_save_on_map(centroids, file_name):
+    """
+    Plots the KMeans data on a map of Europe.
+    Args:
+        centroids: Data to plot.
+        file_name: File path to save location.
+
+    """
+    map_center = np.mean(centroids, axis=0)
+
+    map = folium.Map(location=map_center, zoom_start=4)
+
+    for location in centroids:
+        folium.Marker([location[0], location[1]]).add_to(map)
+
+    print(f"Saving map to {file_name}")
+    map.save(file_name)
 
 
 if __name__ == '__main__':
