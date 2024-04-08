@@ -14,7 +14,7 @@ os.environ['LOKY_MAX_CPU_COUNT'] = '4'
 
 def main():
     should_load_kmeans = True
-    clusters_count = 10
+    clusters_count = 1000
     bombing_dataset_name = 'Data/DataSets/operations_cleaned.csv'
     world_locations_dataset_name = 'Data/DataSets/emea_locations.csv'
     kmeans_model_name = f'Data/kmeans_bombing_model_clusters_{clusters_count}.pkl'
