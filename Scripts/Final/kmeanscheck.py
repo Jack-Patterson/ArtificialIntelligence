@@ -116,49 +116,68 @@ bombing_locations = np.array(bombing_locations)
 world_locations = np.array(world_locations)
 
 print("Beginning KMeans")
-kmeans = KMeans(n_clusters=500)
+# kmeans = KMeans(n_clusters=1000)
+#
+# print('fitting locations')
+# kmeans = kmeans.fit(world_locations)
 
-print('fitting locations')
-kmeans = kmeans.fit(world_locations)
+kmeans = joblib.load('Data/kmeans_bombing_model_1000_clusters.pkl')
 
 print("Fitting bombing locations to a world location")
 nearest_locations_indices = kmeans.predict(bombing_locations)
 
-print("Getting coordinates of location")
+# bombings_per_centroid = np.bincount(nearest_locations_indices)
+# significant_centroids_indices = np.where(bombings_per_centroid > 10)[0]
+# significant_centroids = kmeans.cluster_centers_[significant_centroids_indices]
+# significant_bombing_locations_indices = np.isin(nearest_locations_indices, significant_centroids_indices)
+# significant_bombing_locations = bombing_locations[significant_bombing_locations_indices]
+
 nearest_locations = kmeans.cluster_centers_[nearest_locations_indices]
-print(len(nearest_locations))
 
-rounded_locations = np.round(nearest_locations, decimals=5)
-dtype = np.dtype(','.join(['f8'] * rounded_locations.shape[1]))
-_, unique_indices = np.unique(rounded_locations.view(dtype), return_index=True, axis=0)
-unique_nearest_locations = nearest_locations[unique_indices]
+rounded_significant_centroids = np.round(nearest_locations, decimals=5)
+dtype = np.dtype(','.join(['f8'] * rounded_significant_centroids.shape[1]))
+_, unique_indices = np.unique(rounded_significant_centroids.view(dtype), return_index=True, axis=0)
+unique_significant_centroids = nearest_locations[unique_indices]
 
-print("Saving KMeans model")
-joblib.dump(kmeans, 'data/kmeans_bombing_model_500_clusters.pkl')
+print("Getting coordinates of location")
+# print(len(nearest_locations))
+#
+# rounded_locations = np.round(nearest_locations, decimals=5)
+# dtype = np.dtype(','.join(['f8'] * rounded_locations.shape[1]))
+# _, unique_indices = np.unique(rounded_locations.view(dtype), return_index=True, axis=0)
+# unique_nearest_locations = nearest_locations[unique_indices]
+
+# print("Saving KMeans model")
+# joblib.dump(kmeans, 'data/kmeans_bombing_model_1000_clusters.pkl')
 print("Completed KMeans")
 
+# bombings_per_centroid = np.bincount(nearest_locations_indices)
+# significant_centroids_indices = np.where(bombings_per_centroid > 10)[0]
+# significant_centroids = kmeans.cluster_centers_[significant_centroids_indices]
+# significant_bombing_locations = bombing_locations[np.isin(nearest_locations_indices, significant_centroids_indices)]
+
 print('plotting on scatter')
-latitude = unique_nearest_locations[:, 0]
-longitude = unique_nearest_locations[:, 1]
+latitude = unique_significant_centroids[:, 0]
+longitude = unique_significant_centroids[:, 1]
 
 plt.scatter(longitude, latitude)
 plt.xlabel('Longitude')
 plt.ylabel('Latitude')
 plt.title('Geographical Scatter Plot')
 
-plt.savefig('data/bombing_scatter_500_clusters.png')
+plt.savefig('data/bombing_scatter_1000_clusters.png')
 plt.close()
 
 print("Plotting on map")
-map_center = np.mean(unique_nearest_locations, axis=0)
+map_center = np.mean(unique_significant_centroids, axis=0)
 
 map = folium.Map(location=map_center, zoom_start=4)
 
-for location in unique_nearest_locations:
+for location in unique_significant_centroids:
     folium.Marker([location[0], location[1]]).add_to(map)
 
 print("Saving map")
-map_path = 'Data/map_of_locations_500_clusters.html'
+map_path = 'Data/map_of_locations_1000_clusters.html'
 map.save(map_path)
 
 print(f"Map has been saved to {map_path}")
