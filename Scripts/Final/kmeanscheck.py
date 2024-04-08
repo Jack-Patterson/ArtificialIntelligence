@@ -3,10 +3,9 @@ import csv
 import folium
 import joblib
 import numpy as np
+from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
 
-# Simplified datasets
-# Dataset 1: Bombing locations
 # bombing_locations = np.array([
 #     [38.22, 15.37],  # SPADAFORA
 #     [39.27, 16.25],  # COSENZA
@@ -19,7 +18,6 @@ from sklearn.cluster import KMeans
 #     [40.07, 15.63]  # SAPRI
 # ])
 #
-# # Dataset 2: Locations in the world (simplified)
 # # world_locations = np.array([
 # #     [53.6166667, -9.6666667],  # Aasleagh
 # #     [51.9666667, -8.5833333],  # Abbevill
@@ -88,7 +86,8 @@ with open('data/operations_cleaned.csv', mode='r', newline='', encoding='utf-8')
 bombing_locations = []
 for row in rows:
     if row[0] != '' and row[1] != '':
-        bombing_locations.append([float(row[0]), float(row[1])])
+        if row[0] != 100.65 and float(row[1]) < 80.00:
+            bombing_locations.append([float(row[0]), float(row[1])])
 
 with open('data/europenorthafricacitiespop.csv', mode='r', newline='', encoding='utf-8') as infile:
     reader = csv.reader(infile)
@@ -117,36 +116,49 @@ bombing_locations = np.array(bombing_locations)
 world_locations = np.array(world_locations)
 
 print("Beginning KMeans")
-# Initialize KMeans with the number of clusters equal to the number of world locations
-kmeans = KMeans(n_clusters=len(world_locations), random_state=42).fit(world_locations)
+kmeans = KMeans(n_clusters=500)
+
+print('fitting locations')
+kmeans = kmeans.fit(world_locations)
 
 print("Fitting bombing locations to a world location")
-# Predict the nearest cluster center (world location) for each bombing location
 nearest_locations_indices = kmeans.predict(bombing_locations)
 
-print("Getting coordinated of location")
-# Extract the coordinates of the nearest world locations
+print("Getting coordinates of location")
 nearest_locations = kmeans.cluster_centers_[nearest_locations_indices]
+print(len(nearest_locations))
 
-# Save the KMeans model
+rounded_locations = np.round(nearest_locations, decimals=5)
+dtype = np.dtype(','.join(['f8'] * rounded_locations.shape[1]))
+_, unique_indices = np.unique(rounded_locations.view(dtype), return_index=True, axis=0)
+unique_nearest_locations = nearest_locations[unique_indices]
 
 print("Saving KMeans model")
-joblib.dump(kmeans, 'data/kmeans_bombing_model.pkl')
+joblib.dump(kmeans, 'data/kmeans_bombing_model_500_clusters.pkl')
 print("Completed KMeans")
 
+print('plotting on scatter')
+latitude = unique_nearest_locations[:, 0]
+longitude = unique_nearest_locations[:, 1]
+
+plt.scatter(longitude, latitude)
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+plt.title('Geographical Scatter Plot')
+
+plt.savefig('data/bombing_scatter_500_clusters.png')
+plt.close()
+
 print("Plotting on map")
-map_center = np.mean(nearest_locations, axis=0)
+map_center = np.mean(unique_nearest_locations, axis=0)
 
-# Create a folium map centered around `map_center`
-m = folium.Map(location=map_center, zoom_start=4)
+map = folium.Map(location=map_center, zoom_start=4)
 
-# Add markers for each nearest settlement
-for location in nearest_locations:
-    folium.Marker([location[0], location[1]]).add_to(m)
+for location in unique_nearest_locations:
+    folium.Marker([location[0], location[1]]).add_to(map)
 
 print("Saving map")
-# Save the map to an HTML file (adjust the filename as needed)
-map_path = 'Data/map_of_locations.html'
-m.save(map_path)
+map_path = 'Data/map_of_locations_500_clusters.html'
+map.save(map_path)
 
 print(f"Map has been saved to {map_path}")
