@@ -17,20 +17,23 @@ def main():
     clusters_count = 1000
     bombing_dataset_name = 'Data/DataSets/operations_cleaned.csv'
     world_locations_dataset_name = 'Data/DataSets/emea_locations.csv'
+    europe_cities_dataset_name = 'Data/DataSets/europe_locations_pop_greater_1000.csv'
     kmeans_model_name = f'Data/kmeans_bombing_model_clusters_{clusters_count}.pkl'
     scatter_diagram_name = f'Data/Images/bombing_scatter_clusters_{clusters_count}.png'
     map_name = f'Data/Images/map_of_locations_clusters_{clusters_count}.html'
 
     print('Cleaning original csv files.')
-    # clean_bombing_operations()
+    clean_bombing_operations()
     # clean_world_locations()
 
     print('Loading the files into memory and filtering for relevant rows.')
     _, bombing_locations_full = load_file(bombing_dataset_name)
     _, world_locations_full = load_file(world_locations_dataset_name)
+    _, europe_cities_full = load_file(europe_cities_dataset_name)
 
     bombing_locations = filter_for_latitude_and_longitude(bombing_locations_full, 4, 5)
     world_locations = filter_for_latitude_and_longitude(world_locations_full, 3, 4)
+    europe_cities = split_and_filter_for_latitude_and_longitude(europe_cities_full, 19, ', ')
 
     print('Beginning KMeans.')
     bombings_per_centroid_threshold = 10
@@ -58,6 +61,13 @@ def main():
     print('Rounding for significant centroids.')
     unique_significant_centroids = round_significant_centroids(significant_centroids)
 
+    print("Finding closest world locations to centroids.")
+    closest_locations = find_closest_world_locations(unique_significant_centroids, europe_cities_full)
+
+    print("Saving closest locations to CSV.")
+    closest_locations_csv_name = f'Data/Closest_Locations_to_Centroids_{clusters_count}.csv'
+    save_closest_locations_to_csv(closest_locations, closest_locations_csv_name)
+
     print('Plotting on scatter diagram.')
     plot_and_save_on_scatter_diagram(unique_significant_centroids, scatter_diagram_name)
 
@@ -75,10 +85,10 @@ def clean_bombing_operations(input_name='Data/DataSets/operations.csv',
         output_name: Name of the new file.
 
     """
-    emea_countries_in_dataset = ['POLAND', 'AUSTRIA', 'YUGOSLAVIA', 'ITALY', 'SICILY', 'TUNISIA', 'BULGARIA', 'FRANCE',
+    emea_countries_in_dataset = ['POLAND', 'AUSTRIA', 'YUGOSLAVIA', 'ITALY', 'SICILY', 'BULGARIA', 'FRANCE',
                                  'GREAT BRITAIN', 'PANTELLARIA', 'SARDINIA', 'ALGERIA', 'ROMANIA',
-                                 'HOLLAND OR NETHERLANDS', 'GERMANY', 'ALBANIA', 'LUXEMBOURG', 'LIBYA', 'CYPRUS',
-                                 'CRETE', 'DENMARK', 'HUNGARY', 'CORSICA', 'SWITZERLAND', 'NORWAY', 'BELGIUM', 'GREECE',
+                                 'HOLLAND OR NETHERLANDS', 'GERMANY', 'ALBANIA', 'LUXEMBOURG', 'CYPRUS', 'CRETE',
+                                 'DENMARK', 'HUNGARY', 'CORSICA', 'SWITZERLAND', 'NORWAY', 'BELGIUM', 'GREECE',
                                  'CZECHOSLOVAKIA']
     rows_and_headers_to_keep = [1, 3, 14, 15, 19, 20]
 
@@ -143,6 +153,20 @@ def filter_for_latitude_and_longitude(data, latitude_index, longitude_index):
 
     """
     return np.array([[row[latitude_index], row[longitude_index]] for row in data])
+
+
+def split_and_filter_for_latitude_and_longitude(data, index, split_value):
+    """
+    Filters the data and only gets the latitude and longitude data.
+    Args:
+        data: Raw data from the csv.
+        index: Index of the row.
+        split_value: Value to split the index by.
+
+    Returns: Numpy array of latitude and longitudes.
+
+    """
+    return np.array([[row[index].split(split_value)[0], row[index].split(split_value)[1]] for row in data])
 
 
 def cluster_and_fit_data(data, number_clusters):
@@ -247,6 +271,42 @@ def plot_and_save_on_map(centroids, file_name):
 
     print(f"Saving map to {file_name}")
     map.save(file_name)
+
+
+def find_closest_world_locations(centroids, world_locations):
+    """
+    Finds the closest world location to each centroid.
+
+    Args:
+        centroids: The centroids from KMeans.
+        world_locations: The world locations to compare against.
+
+    Returns:
+        A list of tuples containing the centroid and its closest world location.
+    """
+    closest_locations = []
+    for centroid in centroids:
+        closest_location = min(world_locations,
+                               key=lambda loc: np.linalg.norm(
+                                   centroid - np.array([float(loc[19].split(', ')[0]), float(loc[19].split(', ')[1])])))
+        closest_locations.append((centroid, closest_location))
+    return closest_locations
+
+
+def save_closest_locations_to_csv(closest_locations, file_name):
+    """
+    Saves the closest world locations to each centroid to a CSV file.
+
+    Args:
+        closest_locations: A list of tuples containing the centroid and its closest world location.
+        file_name: The name of the file to save the data.
+    """
+    with open(file_name, mode='w', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Centroid Latitude', 'Centroid Longitude', 'Name', 'Country Name', 'Closest Location Latitude',
+                         'Closest Location Longitude'])
+        for centroid, location in closest_locations:
+            writer.writerow([centroid[0], centroid[1], location[2], location[7], location[19].split(', ')])
 
 
 if __name__ == '__main__':
