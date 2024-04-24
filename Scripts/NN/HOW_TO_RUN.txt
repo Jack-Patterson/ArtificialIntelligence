@@ -1,0 +1,10 @@
+Python 3.8 installed
+
+cmd line args:
+[In NN Folder]
+..\..\venv\Scripts\activate
+pip install -r ..\..\requirements.txt
+python .\DataProcessing.py
+
+
+It will likely take a long time to run. If it does, change the value of clusters_count in main() to a lower number like 200 for faster results.

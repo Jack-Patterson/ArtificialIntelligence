@@ -8,7 +8,7 @@ from geopy.distance import geodesic
 from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
 
-from NN.DataCleaner import DataCleaner
+from DataCleaner import DataCleaner
 
 os.environ['LOKY_MAX_CPU_COUNT'] = '4'
 
@@ -34,7 +34,7 @@ def main():
 
     """
     should_load_kmeans = False
-    clusters_count = 1000
+    clusters_count = 4000
     bombing_dataset_name = 'Data/DataSets/operations_cleaned.csv'
     world_locations_dataset_name = 'Data/DataSets/emea_locations.csv'
     europe_cities_dataset_name = 'Data/DataSets/europe_locations_pop_greater_1000.csv'
